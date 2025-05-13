@@ -15,14 +15,14 @@ GID_FORNECEDOR = '1111839866'  # GID da aba "FORNECEDOR2"
 # URL de exportação CSV para a aba "FORNECEDOR2"
 url_fornecedores = f'https://docs.google.com/spreadsheets/d/14l5BdSDd1dFaKyGHAjgJHIQgGbPs9xU_BfxZDFhaTqY/export?format=csv&gid={GID_FORNECEDOR}'
 
-# Definir os cabeçalhos esperados
+# Definir os cabeçalhos esperados da planilha
 fornecedor_headers = [
     'PRODUTO', 'FORNECEDOR', 'MARCA', 'KG da Unidade', 'UNIDADE/EMBALAGEM', 'VALOR UNITÁRIO',
     'MÉDIA/KG', 'VALOR/EMBALAGEM', 'VALOR/TONELADA', 'PREÇO DE VENDA',
     'QUANTIDADE MÍNIMA (Embalagens)', 'LOCAL DE ENTREGA'
 ]
 
-# Função para carregar os dados
+# Função para carregar os dados da planilha
 @st.cache_data(ttl=300)  # Cache por 5 minutos
 def load_data():
     try:
@@ -41,7 +41,7 @@ def load_data():
         else:
             num_columns = 0
 
-        # Ajustar os cabeçalhos se necessário
+        # Ajustar os cabeçalhos se o número de colunas não corresponder
         if num_columns != len(fornecedor_headers):
             adjusted_headers = fornecedor_headers[:num_columns]
             if num_columns > len(fornecedor_headers):
@@ -62,7 +62,7 @@ def load_data():
         print("Dados após conversão de colunas de texto:")
         print(df)
 
-        # Processar colunas numéricas
+        # Processar colunas numéricas, removendo "R$", pontos de milhar e convertendo vírgulas para pontos
         numeric_columns = [col for col in ['KG da Unidade', 'VALOR UNITÁRIO', 'MÉDIA/KG', 'VALOR/EMBALAGEM', 'VALOR/TONELADA', 'QUANTIDADE MÍNIMA (Embalagens)'] if col in df.columns]
         for col in numeric_columns:
             df[col] = df[col].astype(str).str.replace('R\\$', '', regex=True).str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
